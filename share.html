@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Skills - Skill Swap</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #FFD89B, #FFECD2);
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            color: #FF8C00;
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        .btn {
+            padding: 1rem 2rem;
+            background: #FFB74D;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            background: #FFA726;
+            transform: scale(1.05);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .success-message {
+            color: green;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            display: none; /* Hidden initially */
+        }
+        .error-message {
+            color: red;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            display: none; /* Hidden initially */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Share Your Skills</h1>
+        <p>Contribute your expertise and help others grow by sharing what you know!</p>
+
+        <p id="successMessage" class="success-message">Submitted successfully!</p>
+        <p id="errorMessage" class="error-message">Error submitting form. Try again.</p>
+
+        <form id="skillForm">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="text" name="skill" placeholder="Skill Name" required>
+            <textarea name="experience" placeholder="Describe your experience" required></textarea>
+            <input type="submit" value="Share Skill" id="submitBtn">
+        </form>
+        <br>
+        <a href="home.php" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#skillForm").submit(function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                $.ajax({
+                    type: "POST",
+                    url: "share.php",
+                    data: $(this).serialize(), // Serialize form data
+                    success: function (response) {
+                        if (response.trim() === "success") {
+                            $("#successMessage").fadeIn();
+                            $("#errorMessage").hide();
+                            $("#skillForm")[0].reset(); // Reset form fields
+                        } else {
+                            $("#errorMessage").fadeIn().text(response);
+                            $("#successMessage").hide();
+                        }
+                    },
+                    error: function () {
+                        $("#errorMessage").fadeIn().text("An error occurred while submitting the form.");
+                        $("#successMessage").hide();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

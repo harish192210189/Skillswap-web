@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Reviews</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .star-rating {
+            font-size: 25px;
+            cursor: pointer;
+            color: #ccc;
+        }
+        .star-rating .star:hover,
+        .star-rating .star.active {
+            color: gold;
+        }
+        .review-box {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .submit-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .review-card {
+            background: #fff;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .stars {
+            color: gold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>User Reviews</h2>
+        <div class="star-rating">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+        </div>
+        <textarea id="reviewText" class="review-box" placeholder="Write your review..."></textarea>
+        <button class="submit-btn">Submit Review</button>
+
+        <h3>All Reviews</h3>
+        <div id="reviewsContainer"></div>
+    </div>
+
+    <script>
+        let selectedRating = 0;
+        $(".star").click(function () {
+            selectedRating = $(this).data("value");
+            $(".star").removeClass("active");
+            $(this).prevAll().addBack().addClass("active");
+        });
+
+        $(".submit-btn").click(function () {
+            let reviewText = $("#reviewText").val();
+            let userId = new URLSearchParams(window.location.search).get("user_id");
+
+            if (selectedRating === 0 || reviewText.trim() === "") {
+                alert("Please provide a rating and review.");
+                return;
+            }
+
+            $.post("review.php", { user_id: userId, rating: selectedRating, review_text: reviewText }, function (response) {
+                alert(response);
+                $("#reviewText").val("");
+                $(".star").removeClass("active");
+                selectedRating = 0;
+                loadReviews(userId);
+            });
+        });
+
+        function loadReviews(userId) {
+            $.get("review.php", { user_id: userId }, function (data) {
+                $("#reviewsContainer").html(data);
+            });
+        }
+
+        $(document).ready(function () {
+            let userId = new URLSearchParams(window.location.search).get("user_id");
+            loadReviews(userId);
+        });
+    </script>
+</body>
+</html>

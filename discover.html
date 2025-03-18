@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discover Skills - Skill Swap</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #ffd89b, #ffecd2);
+        color: #333;
+        text-align: center;
+        margin: 0;
+        padding: 2rem;
+      }
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        margin: auto;
+      }
+      h1 {
+        color: #ff8c00;
+      }
+      p {
+        font-size: 1.2rem;
+      }
+      .btn {
+        padding: 1rem 2rem;
+        background: #ffb74d;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.3s, transform 0.2s;
+        display: inline-block;
+        margin-top: 1rem;
+      }
+      .btn:hover {
+        background: #ffa726;
+        transform: scale(1.05);
+      }
+      .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+      .skill-card {
+        background: #f9f9f9;
+        padding: 1.2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        flex: 1 1 calc(33.33% - 20px);
+        min-width: 250px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .skill-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .connect-btn {
+        padding: 0.5rem 1rem;
+        background: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s;
+      }
+      .connect-btn a {
+        color: white;
+      }
+      .connect-btn:hover {
+        background: #218838;
+      }
+      .skill-link {
+        text-decoration: none;
+        color: #333;
+      }
+
+      #searchContainer {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      #searchBar,
+      #skillFilter,
+      #experienceFilter {
+        padding: 0.8rem;
+        margin: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #cccccc;
+      }
+
+      @media (max-width: 1024px) {
+        .skill-card {
+          flex: 1 1 calc(50% - 20px); /* 2 per row on tablets */
+        }
+      }
+
+      @media (max-width: 600px) {
+        .skill-card {
+          flex: 1 1 100%; /* 1 per row on mobile */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Discover Skills</h1>
+      <p>
+        Explore a variety of skills shared by the community and find what suits
+        you best!
+      </p>
+
+      <!-- Search and Filter Section -->
+      <div id="searchContainer">
+        <input
+          type="text"
+          id="searchBar"
+          placeholder="Search by name or skill"
+        />
+        <select id="experienceFilter">
+          <option value="">Filter by Experience</option>
+          <option value="1">1 Year</option>
+          <option value="2">2 Years</option>
+          <option value="3">3 Years</option>
+          <option value="4">4 Years</option>
+          <option value="5">5 Years</option>
+        </select>
+      </div>
+
+      <!-- Skills Container -->
+      <div id="skillsContainer" class="skills-container"></div>
+
+      <a href="home.php" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Fetch skills and update the skills container
+        function fetchSkills(
+          searchQuery = "",
+          skillFilter = "",
+          experienceFilter = ""
+        ) {
+          $.ajax({
+            url: "fetch_skills.php",
+            type: "GET",
+            data: {
+              search: searchQuery,
+              skill: skillFilter,
+              experience: experienceFilter,
+            },
+            success: function (response) {
+              let skills = JSON.parse(response);
+              let skillsHtml = "";
+              skills.forEach((skill) => {
+                skillsHtml += `
+                  <div class="skill-card">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMEAAACUCAMAAAAd373qAAAAM1BMVEX///+8vLz09PS5ubn39/f6+vq2trbw8PC/v7/s7OzW1tbExMTIyMjR0dHc3NzMzMzl5eUiycZXAAAF8UlEQVR4nO1c6dLbIAyMLTD4At7/aQs+8jmJjyUR2J3x/mqbKdFGEjoQPB43bty4cePGjRtXhxRlHVCW8mxRYiGV61tdUDGAPArdNU6dLRcEWbq+qKpqkv4P5P+xKnp3bX0IZboV4V95dEaJswVdh6yNpV3xJ1RkTX09TQjTawLEnzxD9+ZaihCmK1DxJxJFdyUORkfKP3LQ5mzBJzjYej5IkDtbeA/VVl/KH1B1ZweJ0nytgFkNpjyTgOt+k3/g0J1oSo3+nYCnoJuT5C8ZFDBx6E6xpJpFARMFXecn4L4IATsU8u+rBsmAYlBlDm/NL0HgAhRkAgKeQpMtYZUNswVNoGwUTBoCnkImQzIpTGhEHl9wqTQQkGNTVT+mcgcMKHmuKtqUBEJ0Tl252bQEPAWblkCybWhBIak31zo5gaJImeWJ5DYUQDadK2SwoYFCMjtSOWwoQKfaUrPYUECq/ahOl028o0rjzNE2NDTcB0QrT6cg4OJUQEXbO1UKIUrlmjayJq1S5EdtjPi6a2opRTlCSFE3XVRnoOUn4CLkL6wpZ+lniNLZmKSQXQkS34io/ZR/5GDwtJAsd73mYD8mW6/JP3Co8SaZ5lYCXBpTr7YIeAqqh9dhbkUqWP/9pvgjepRByxuY0dKSennAQKJa4N1Q0a/1/ndAwFMA9wT/YzAyKDE/Jr26Cb35QokGBs6GNhiPyR0T8BRAk2Q1I8yI6MiLZ6DL8RGQ0G9GejMQvCkBLVb5HEFBRkQNRsADiy4V336K9Rk15AWDErAIz9iDhMIZdQpVQamg7IL4ElRs78CNqBQNtCJxERDYXgobUTAjaMWKq+2CFcgtbkTejKB6ia1cxhy5jSBQlhgDLlfG0snuOCVamFEHrckV07AKGUjq/iAttCbXZoRF0MO8+oUBpleupst/z0CeyIAnMwKLgw4PB7AfaJ4SAWxZtzEMwL2IqYldQ1+WIqIVBU9IAxngqSmcnGZmUDS4K0sss8vMgGyEFaE9TB4G6OFTy13hsHlyiX1bRJUp0B4m024KRjRfUtUggxrtYTJFNPj4iQzIAD7VzZsXBWDtFnwygIsBfP5EUGYh8EMEruwabZgPw36HBGLGDLkqnIhhBDKH3feI1diqzKijcLNvSMJErMXW+wW7LTOFXQYxBPi6LWDHa0azeZAmFJoPjWDreGFdx7/vtU6unsZKh9U1z4X4uo6RE6ake/Xp0FL1kfP+jJ1frPu+ROCwJCGD/LGLMHbfsROQF1ClmyFNGuypbvQ30/6MR4HwOfYSVUVtZ63tWv/HL/4/5ylU1GQOvc5/0PLvFDMbwnoSCDZcinGuZWuGhch/hg8aMRUHI+ATcQpTUcp1K1ZP1A2f9aAeeE/EsakEquxc49RN8TKb5h2heX5mIa9mHoNHJkOoWwRjIZSx7TBqR6StUYsgJ5BjNO7JkOPpHGrfI7GQUoiBjPz4xB3+ItzTOUcTUt6BV8LwNqQ6cmn2Can9iRTSRsS0TYNizG6OwT+ltjsp6HeZOPkHDvsXaxOMa25Xy2R3BtN2KKgdvSaY1tyOy1VMu/EVdnPNJDeKNnz5eDBtG5uRMsnU8ka5/AuBTQqJJsdXp/fhqagtrFFIdptIfe5/3ol/ZLDizpTsBsVn4yhmImcDKylGwttQHzeJ0Lm0XQrvbdSUN4neb3Nhs42HFN4S37R39l/sCOmSInjtpKa+4ruwI4o6Qd7D8rJn6luND7HYj9Ajm2MGf4eN6W+WPuq5SKSDHm8Uhdk6iTI8XDH5HcNGusC8peZ5tmLqQTKq4NmUz/XiQ1D5z9nEO0J2keulgeG1h5gpCgThkDzfaw/hxQ3LS8BTsBlf3PBomFUQlJD3FSPJE42XyP5GHzeFEx4Z5KVwziuJjDH5rGce2TK7k+R/DK/IMsh/7jubDDXaqfI/fnbokxUw4hcOpytgwremdBX5AyJ774P4V7CfJSK3pcvJH/B+1rQn/hXlH4F49XWln7CriUsazxrWDOrKprMJ+cTZkty4cePGjRs3bhziH65RWz56EjdKAAAAAElFTkSuQmCC"/>
+                    <h3>${skill.skills}</h3>
+                    <p><strong>Shared by:</strong> ${skill.Fullname}</p>
+                    <p><strong>Experience:</strong> ${skill.experience} years</p></a>
+                    <button class="connect-btn"><a href="user_profile.php?id=${skill.id}" class="skill-link">view profile</a></button>
+                    <button class="connect-btn" data-userid="${skill.id}" data-username="${skill.name}">Connect</button>
+                  </div>`;
+              });
+              $("#skillsContainer").html(skillsHtml);
+
+              // Add event listener to connect buttons
+              $(".connect-btn").click(function (event) {
+                event.stopPropagation(); // Stops click event from propagating to parent elements
+                let userId = $(this).data("userid");
+                let username = $(this).data("username");
+                sendConnectionRequest(userId, username);
+              });
+            },
+            error: function () {
+              $("#skillsContainer").html("<p>Error loading skills.</p>");
+            },
+          });
+        }
+
+        // Send connection request to backend
+        function sendConnectionRequest(userId, username) {
+          $.ajax({
+            url: "connect.php",
+            type: "POST",
+            data: { receiver_id: userId, receiver_name: username },
+            success: function (response) {
+              let res = JSON.parse(response);
+              alert(res.message);
+            },
+            error: function () {
+              alert("Error sending connection request.");
+            },
+          });
+        }
+
+        // Initial fetch to display all skills
+        fetchSkills();
+
+        // Add event listener for search bar
+        $("#searchBar").on("keyup", function () {
+          let searchQuery = $(this).val();
+          let skillFilter = $("#skillFilter").val();
+          let experienceFilter = $("#experienceFilter").val();
+          fetchSkills(searchQuery, skillFilter, experienceFilter);
+        });
+
+        // Add event listener for skill filter
+        $("#skillFilter").on("change", function () {
+          let skillFilter = $(this).val();
+          let searchQuery = $("#searchBar").val();
+          let experienceFilter = $("#experienceFilter").val();
+          fetchSkills(searchQuery, skillFilter, experienceFilter);
+        });
+
+        // Add event listener for experience filter
+        $("#experienceFilter").on("change", function () {
+          let experienceFilter = $(this).val();
+          let searchQuery = $("#searchBar").val();
+          let skillFilter = $("#skillFilter").val();
+          fetchSkills(searchQuery, skillFilter, experienceFilter);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,747 @@
+ if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id']; // ✅ Store user ID in session
+            $_SESSION['username'] = $user['name'];
+            echo json_encode(["success" => true, "message" => "Login successful"]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Incorrect password"]);
+        }
+    } else {
+        echo json_encode(["success" => false, "message" => "User not found"]);
+    }
+
+
+
+
+    <?php
+session_start();
+$host = "localhost";
+$user = "root"; // Change if needed
+$password = ""; // Change if needed
+$database = "skillswap";
+
+$conn = new mysqli($host, $user, $password, $database,3307);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    $stmt = $conn->prepare("SELECT id, Fullname, password FROM userregister WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $stored_hash = $user['password']; // Hashed password from database
+    
+        // Debugging output (Remove after testing)
+        echo json_encode([
+            "success" => false, 
+            "message" => "Debugging",
+            "entered_password" => $password,
+            "stored_hash" => $stored_hash,
+            "verify_result" => password_verify($password, $stored_hash)
+        ]);
+        exit;
+    }
+    
+    $stmt->close();
+    $conn->close();
+}
+?>
+
+
+
+<?php
+session_start();
+include "db.php"; // Include your database connection file
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    // Validate user from database
+    $query = "SELECT * FROM users WHERE email='$email'";
+    $result = mysqli_query($conn, $query);
+    
+    if (mysqli_num_rows($result) == 1) {
+        $user = mysqli_fetch_assoc($result);
+
+        // Check if the entered password matches the hashed password
+        if (password_verify($password, $user['password'])) {
+            // Password is correct, store session data
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['dob'] = $user['dob'];
+            $_SESSION['mobile'] = $user['mobile'];
+            $_SESSION['experience'] = $user['experience'];
+
+            // Return a success response with the redirection to home.html
+            echo json_encode(["success" => true, "redirect" => "home.html"]);
+        } else {
+            // Invalid password
+            echo json_encode(["success" => false, "message" => "Incorrect password"]);
+        }
+    } else {
+        // No user found with this email
+        echo json_encode(["success" => false, "message" => "No user found with this email"]);
+    }
+}
+?>
+
+
+
+<style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #a2c2e3, #b5e0f6);
+        animation: gradientBG 10s infinite alternate;
+        overflow: hidden;
+      }
+
+      @keyframes gradientBG {
+        0% { background: linear-gradient(135deg, #a2c2e3, #b5e0f6); }
+        100% { background: linear-gradient(135deg, #9bb8d9, #d1e6f4); }
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        animation: fadeIn 1s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+        letter-spacing: 1px;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+        text-align: left;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 400;
+        color: #555;
+        margin-bottom: 0.5rem;
+        transition: 0.3s ease;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 8px;
+        background: rgba(220, 220, 220, 0.8);
+        color: #333;
+        font-size: 1.1rem;
+        transition: 0.3s ease-in-out;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group input::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+      }
+
+      .form-group input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        transform: translateY(-5px);
+      }
+
+      .form-group input:focus + label {
+        color: #007bff;
+        transform: translateY(-20px);
+        font-size: 0.9rem;
+      }
+
+      #submit {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #6db9ff, #4fa3d1);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        letter-spacing: 1px;
+      }
+
+      #submit:hover {
+        background: linear-gradient(135deg, #5ab6f0, #3e92c1);
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+      }
+
+      .link {
+        margin-top: 1rem;
+      }
+
+      .link a {
+        color: #4fa3d1;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      .link a:hover {
+        text-decoration: underline;
+        color: #3a8aaf;
+      }
+
+      /* Add a subtle pulse effect on input field focus */
+      .form-group input:focus {
+        animation: pulse 1s ease-out;
+      }
+
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.6); }
+        50% { box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.6); }
+      }
+
+
+
+<?php
+session_start();
+include "db.php"; // Include your database connection file
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    // Validate user from database
+    $query = "SELECT * FROM users WHERE email='$email'";
+    $result = mysqli_query($conn, $query);
+    
+    if (mysqli_num_rows($result) == 1) {
+        $user = mysqli_fetch_assoc($result);
+
+        // Check if the entered password matches the hashed password
+        if (password_verify($password, $user['password'])) {
+            // Password is correct, store session data
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['dob'] = $user['dob'];
+            $_SESSION['mobile'] = $user['mobile'];
+            $_SESSION['experience'] = $user['experience'];
+
+            // Return a success response with the redirection to home.html
+            echo json_encode(["success" => true, "redirect" => "home.html"]);
+        } else {
+            // Invalid password
+            echo json_encode(["success" => false, "message" => "Incorrect password"]);
+        }
+    } else {
+        // No user found with this email
+        echo json_encode(["success" => false, "message" => "No user found with this email"]);
+    }
+}
+?>
+
+
+
+
+<?php
+ session_start();
+$connection = new mysqli("localhost", "root", "", "skillswap", 3307);
+
+if ($connection->connect_error) {
+    die("Connection failed: " . $connection->connect_error);
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    $mobile = trim($_POST['mobile']);
+    $skills = trim($_POST['skills']);
+    $experience = trim($_POST['experience']);
+    $dob = trim($_POST['dob']);
+
+    // Validate input (basic example)
+    if (empty($name) || empty($email) || empty($password) || empty($mobile) || empty($skills) || empty($experience) || empty($dob)) {
+        die(json_encode(["success" => false, "message" => "All fields are required."]));
+    }
+
+    // Hash the password securely
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Use Prepared Statements to prevent SQL Injection
+    $stmt = $connection->prepare("INSERT INTO userregister (Fullname, email, password, mobile, skills, experience, dob) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssss", $name, $email, $hashed_password, $mobile, $skills, $experience, $dob);
+
+    if ($stmt->execute()) {
+        echo '<script>location.replace("home.php")</script>';
+    } else {
+        echo json_encode(["success" => false, "message" => "Error: " . $stmt->error]);
+    }
+
+    $stmt->close();
+}
+
+$connection->close();
+?>
+
+
+
+<?php
+$servername = "localhost";
+$username = "root"; // Default XAMPP username
+$password = ""; // Default XAMPP password (empty)
+$database = "skillswap"; // Your database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch all shared skills
+$sql = "SELECT id, name, skill, experience FROM skills";
+$result = $conn->query($sql);
+
+$skills = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $skills[] = $row;
+    }
+}
+
+header('Content-Type: application/json');
+echo json_encode($skills, JSON_PRETTY_PRINT);
+$conn->close();
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Skills - Skill Swap</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #FFD89B, #FFECD2);
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            color: #FF8C00;
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        .btn {
+            padding: 1rem 2rem;
+            background: #FFB74D;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            background: #FFA726;
+            transform: scale(1.05);
+        }
+        .skill-card {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discover Skills</h1>
+        <p>Explore a variety of skills shared by the community and find what suits you best!</p>
+
+        <div id="skillsContainer"></div>
+
+        <a href="home.html" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            function fetchSkills() {
+                $.ajax({
+                    url: "fetch_skills.php",
+                    type: "GET",
+                    success: function (response) {
+                        let skills = JSON.parse(response);
+                        let skillsHtml = "";
+                        skills.forEach(skill => {
+                            skillsHtml += `
+                                <div class="skill-card">
+                                    <h3>${skill.skill}</h3>
+                                    <p><strong>Shared by:</strong> ${skill.name}</p>
+                                    <p><strong>Experience:</strong> ${skill.experience}</p>
+                                </div>`;
+                        });
+                        $("#skillsContainer").html(skillsHtml);
+                    },
+                    error: function () {
+                        $("#skillsContainer").html("<p>Error loading skills.</p>");
+                    }
+                });
+            }
+
+            fetchSkills(); // Load skills when the page is loaded
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+<style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #ffd89b, #ffecd2);
+        color: #333;
+        text-align: center;
+        margin: 0;
+        padding: 2rem;
+      }
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        margin: auto;
+      }
+      h1 {
+        color: #ff8c00;
+      }
+      p {
+        font-size: 1.2rem;
+      }
+      .btn {
+        padding: 1rem 2rem;
+        background: #ffb74d;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.3s, transform 0.2s;
+        display: inline-block;
+        margin-top: 1rem;
+      }
+      .btn:hover {
+        background: #ffa726;
+        transform: scale(1.05);
+      }
+      .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+      .skill-card {
+        background: #f9f9f9;
+        padding: 1.2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        flex: 1 1 calc(33.33% - 20px);
+        min-width: 250px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .skill-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .connect-btn {
+        padding: 0.5rem 1rem;
+        background: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s;
+      }
+      .connect-btn:hover {
+        background: #218838;
+      }
+      @media (max-width: 1024px) {
+        .skill-card {
+          flex: 1 1 calc(50% - 20px); /* 2 per row on tablets */
+        }
+      }
+
+      @media (max-width: 600px) {
+        .skill-card {
+          flex: 1 1 100%; /* 1 per row on mobile */
+        }
+      }
+    </style>
+
+
+
+
+    <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    echo "Please log in first.";
+    exit();
+}
+
+$chat_partner_id = $_GET['id']; // The ID of the chat partner
+
+// Verify chat permission
+$connection = new mysqli("localhost", "root", "", "skillswap", 3307);
+$query = "SELECT status FROM connections WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)";
+$stmt = $connection->prepare($query);
+$stmt->bind_param("iiii", $_SESSION['user_id'], $chat_partner_id, $chat_partner_id, $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+
+if ($row['status'] !== 'accepted') {
+    echo "You can only chat after request acceptance.";
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .chat-box { width: 50%; margin: auto; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; }
+        .message { padding: 5px; margin: 5px; border-radius: 5px; }
+        .sent { background: #d1e7dd; text-align: right; }
+        .received { background: #f8d7da; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>Chat with User ID <?php echo $chat_partner_id; ?></h2>
+    <div class="chat-box" id="chat-box"></div>
+    <input type="text" id="message" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        function loadMessages() {
+            $.ajax({
+                url: "load_messages.php",
+                type: "POST",
+                data: { chat_partner_id: <?php echo $chat_partner_id; ?> },
+                success: function (response) {
+                    $("#chat-box").html(response);
+                }
+            });
+        }
+
+        function sendMessage() {
+            let message = $("#message").val();
+            if (message.trim() === "") return;
+
+            $.ajax({
+                url: "send_message.php",
+                type: "POST",
+                data: { receiver_id: <?php echo $chat_partner_id; ?>, message: message },
+                success: function () {
+                    $("#message").val("");
+                    loadMessages();
+                }
+            });
+        }
+
+        setInterval(loadMessages, 2000);
+        loadMessages();
+    </script>
+</body>
+</html>
+
+
+
+
+
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    echo "Please log in first.";
+    exit();
+}
+
+$logged_in_user = $_SESSION['user_id'];
+$receiver_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($receiver_id == 0) {
+    echo "Invalid chat user.";
+    exit();
+}
+
+$connection = new mysqli("localhost", "root", "", "skillswap", 3307);
+if ($connection->connect_error) {
+    die("Database connection failed.");
+}
+
+// Fetch receiver details
+$query = "SELECT Fullname FROM userregister WHERE id = ?";
+$stmt = $connection->prepare($query);
+$stmt->bind_param("i", $receiver_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$receiver = $result->fetch_assoc();
+
+if (!$receiver) {
+    echo "User not found.";
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with <?php echo htmlspecialchars($receiver['name']); ?></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+        }
+        .chat-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #fff;
+        }
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .send-btn {
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chat with <?php echo htmlspecialchars($receiver['Fullname']); ?></h2>
+        <div class="chat-box" id="chatBox">
+            <!-- Messages will be loaded here via AJAX -->
+        </div>
+        <input type="text" id="message" class="input-box" placeholder="Type a message...">
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            let message = document.getElementById("message").value;
+            if (message.trim() === "") return;
+
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "send_message.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onload = function () {
+                if (this.status == 200) {
+                    document.getElementById("message").value = "";
+                    loadMessages();
+                }
+            };
+            xhr.send("receiver_id=<?php echo $receiver_id; ?>&message=" + encodeURIComponent(message));
+        }
+
+        function loadMessages() {
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", "fetch_messages.php?receiver_id=<?php echo $receiver_id; ?>", true);
+            xhr.onload = function () {
+                if (this.status == 200) {
+                    document.getElementById("chatBox").innerHTML = this.responseText;
+                }
+            };
+            xhr.send();
+        }
+
+        setInterval(loadMessages, 3000); // Refresh chat every 3 seconds
+        loadMessages();
+    </script>
+</body>
+</html>
+
+<?php $connection->close(); ?>

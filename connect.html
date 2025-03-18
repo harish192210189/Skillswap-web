@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect & Collaborate - Skill Swap</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #cce7ff, #e6f7ff);
+        color: #333;
+        text-align: center;
+        margin: 0;
+        padding: 2rem;
+      }
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        max-width: 800px;
+        margin: auto;
+      }
+      h1 {
+        color: #0073e6;
+      }
+      p {
+        font-size: 1.2rem;
+      }
+      .btn {
+        padding: 0.8rem 1.5rem;
+        background: #0073e6;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.3s, transform 0.2s;
+      }
+      .btn:hover {
+        background: #005bb5;
+        transform: scale(1.05);
+      }
+      .request-card {
+        background: #f9f9f9;
+        padding: 1.2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: 1rem 0;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s, transform 0.5s;
+      }
+      .request-card.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Connect & Collaborate</h1>
+      <p>Engage with a vibrant community, build networks, and collaborate on exciting projects!</p>
+
+      <h2>Swap Requests</h2>
+      <div id="requestsContainer"></div>
+
+      <a href="home.php" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        function fetchRequests() {
+          $.ajax({
+            url: "fetch_requests.php",
+            type: "GET",
+            success: function (response) {
+              let requests = JSON.parse(response);
+              if (requests.length === 0) {
+                $("#requestsContainer").html("<p>No swap requests at the moment.</p>");
+                return;
+              }
+
+              let currentIndex = 0;
+
+              function displayNextRequest() {
+                if (currentIndex < requests.length) {
+                  let request = requests[currentIndex];
+                  let requestHtml = `
+                    <div class="request-card active" id="request-${request.id}">
+                      <p><strong>${request.sender_name}</strong> (Skill: ${request.sender_skill}) wants to swap for <strong>${request.receiver_skill}</strong></p>
+                      <div class="btn-container">
+                        <button class="btn accept-btn" data-id="${request.id}" data-action="accept">Accept</button>
+                        <button class="btn deny-btn" data-id="${request.id}" data-action="deny">Deny</button>
+                      </div>
+                    </div>`;
+
+                  $("#requestsContainer").html(requestHtml);
+
+                  $(".request-card").fadeIn(300);
+                }
+              }
+
+              displayNextRequest();
+
+              $(document).on("click", ".accept-btn, .deny-btn", function () {
+                let connectionId = $(this).data("id");
+                let action = $(this).data("action");
+
+                $.ajax({
+                  url: "update_connection.php",
+                  type: "POST",
+                  data: { id: connectionId, action: action },
+                  success: function (response) {
+                    let result = JSON.parse(response);
+                    if (result.success) {
+                      $(".request-card").fadeOut(300, function () {
+                        currentIndex++;
+                        displayNextRequest();
+                      });
+                    } else {
+                      alert("Error: " + result.message);
+                    }
+                  },
+                });
+              });
+            },
+          });
+        }
+
+        fetchRequests();
+      });
+    </script>
+  </body>
+</html>

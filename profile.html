@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+      }
+      header {
+        background: #4a90e2;
+        color: #fff;
+        padding: 1rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+      }
+      nav {
+        background: #3178c6;
+        padding: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      nav .nav-links {
+        display: flex;
+        gap: 1.5rem;
+      }
+      nav a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: color 0.3s;
+      }
+      nav a:hover {
+        color: #ffd700;
+      }
+      .logout-btn {
+        background: #ff4d4d;
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        color: white;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background 0.3s;
+      }
+      .logout-btn:hover {
+        background: #d93636;
+      }
+      .container {
+        max-width: 500px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      }
+      h2,
+      h3 {
+        text-align: center;
+      }
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        display: block;
+      }
+      #edit-profile {
+        background: blue;
+        color: white;
+        border: none;
+        padding: 10px;
+        margin-top: 15px;
+        cursor: pointer;
+        width: 100%;
+        border-radius: 5px;
+      }
+      button:hover {
+        background: darkblue;
+      }
+      #skills-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #skills-list li {
+        background: #4caf50; /* Green background */
+        color: white; /* White text */
+        margin: 5px 0;
+        padding: 8px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for better visibility */
+      }
+      footer {
+        background: #4a90e2;
+        color: #fff;
+        padding: 1rem;
+        margin-top: 2rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Skill Swap</header>
+    <nav>
+      <div class="nav-links">
+        <a href="home.php">Home</a>
+        <a href="discover.html">Discover Skills</a>
+        <a href="connect.html">Swap Request</a>
+        <a href="profile.html">Profile</a>
+      </div>
+      <a href="logout.php" class="logout-btn">Logout</a>
+    </nav>
+    <div class="container">
+      <h2>User Profile</h2>
+      <form id="profile-form" action="editProfile.php" method="POST">
+        <label for="username">Name:</label>
+        <input type="text" id="username" name="username" disabled />
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" disabled />
+
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" disabled />
+
+        <label for="mobile">Mobile Number:</label>
+        <input type="text" id="mobile" name="mobile" disabled />
+
+        <label for="experience">Experience:</label>
+        <input type="text" id="experience" name="experience" disabled />
+        <label for="skills" id="label-skill" style="display: none"
+          >Skills:</label
+        >
+        <textarea
+          id="skills"
+          name="skills"
+          rows="3"
+          disabled
+          style="display: none"
+        ></textarea>
+
+        <input type="submit" id="edit-profile" value="Edit" />
+        <button type="submit" id="save-profile" style="display: none">
+          Save Changes
+        </button>
+      </form>
+      <h3 id="skill-h3">Skills</h3>
+      <ul id="skills-list"></ul>
+    </div>
+    <footer>
+      <p>&copy; 2025 Skill Swap. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("session.php")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Data received from server:", data); // Check if skills is being received
+
+            if (!data.success) {
+              window.location.href = "login.html";
+              return;
+            }
+
+            const skillsList = document.getElementById("skills-list");
+
+            // Check if the skills data is received correctly
+            console.log("Skills:", data.skills);
+
+            // Update user information
+            document.getElementById("username").value = data.username;
+            document.getElementById("email").value = data.email;
+            document.getElementById("dob").value = data.dob;
+            document.getElementById("mobile").value = data.mobile;
+            document.getElementById("experience").value = data.experience;
+            document.getElementById("skills").value = data.skills;
+
+            // Check if skills is a string and split it
+            if (typeof data.skills === "string" && data.skills.trim() !== "") {
+              const skillArray = data.skills.split(","); // Assuming skills are comma-separated
+              skillArray.forEach((skill) => {
+                const newListItem = document.createElement("li");
+                newListItem.textContent = skill.trim(); // Remove leading/trailing spaces
+                skillsList.appendChild(newListItem);
+              });
+            } else {
+              const newListItem = document.createElement("li");
+              newListItem.textContent = "No skills available"; // Fallback message
+              skillsList.appendChild(newListItem);
+            }
+          });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const editButton = document.getElementById("edit-profile");
+        const saveButton = document.getElementById("save-profile");
+        const inputs = document.querySelectorAll(
+          "#profile-form input:not(#edit-profile), #profile-form textarea"
+        );
+
+        // Enable inputs for editing
+        editButton.addEventListener("click", function (event) {
+          event.preventDefault();
+          document.getElementById("skills").style.display = "block";
+          document.getElementById("label-skill").style.display = "block";
+          document.getElementById("skill-h3").style.display = "none";
+          document.getElementById("skills-list").style.display = "none";
+          inputs.forEach((input) => input.removeAttribute("disabled"));
+          editButton.style.display = "none";
+          saveButton.style.display = "block";
+        });
+
+        // Save edited details
+        saveButton.addEventListener("click", function (event) {
+          event.preventDefault();
+
+          let formData = new FormData(document.getElementById("profile-form"));
+
+          fetch("editProfile.php", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert(data.message);
+              if (data.success) {
+                window.location.reload(); // Refresh profile page after update
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+      });
+    </script>
+  </body>
+</html>

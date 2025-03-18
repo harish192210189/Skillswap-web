@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Skill Swap</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: linear-gradient(135deg, #b3e5fc, #e1f5fe);
+        color: #333;
+      }
+
+      /* Navbar */
+      nav {
+        background: #0288d1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 5%;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+      }
+
+      nav .logo {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+      }
+
+      nav ul {
+        list-style: none;
+        display: flex;
+        gap: 2rem;
+      }
+
+      nav ul li {
+        display: inline;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 1.2rem;
+        transition: color 0.3s;
+      }
+
+      nav ul li a:hover {
+        color: #b3e5fc;
+      }
+
+      /* Section Styles */
+      section {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 4rem 10%;
+      }
+
+      .home {
+        background: linear-gradient(135deg, #b3e5fc, #81d4fa);
+        flex-direction: column;
+      }
+
+      .home h1 {
+        font-size: 3rem;
+        color: #0288d1;
+        margin-bottom: 1rem;
+      }
+
+      .home p {
+        font-size: 1.5rem;
+        color: #555;
+        max-width: 600px;
+      }
+
+      .about {
+        background: white;
+        flex-direction: column;
+      }
+
+      .about h2 {
+        font-size: 2.5rem;
+        color: #0277bd;
+        margin-bottom: 1rem;
+      }
+
+      .about p {
+        font-size: 1.3rem;
+        color: #333;
+        max-width: 700px;
+      }
+
+      .get-started {
+        background: linear-gradient(135deg, #4fc3f7, #0288d1);
+        flex-direction: column;
+        color: white;
+      }
+
+      .get-started h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .btn {
+        padding: 1.2rem 3rem;
+        background: white;
+        color: #0288d1;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background 0.3s, transform 0.2s;
+      }
+
+      .btn:hover {
+        background: #b3e5fc;
+        transform: scale(1.1);
+      }
+
+      /* Footer */
+      footer {
+        background: #333;
+        color: white;
+        text-align: center;
+        padding: 1.5rem;
+      }
+
+      footer a {
+        color: #0288d1;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      footer a:hover {
+        color: #b3e5fc;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <div class="logo">Skill Swap</div>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#get-started">Get Started</a></li>
+        <li><a href="#footer">Contact</a></li>
+      </ul>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="home">
+      <h1>Welcome to Skill Swap</h1>
+      <p>"Empower your journey, exchange knowledge, and grow together!"</p>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+      <h2>About Us</h2>
+      <p>
+        Skill Swap is a platform that enables people to exchange knowledge and
+        skills. Whether you're a developer, designer, or teacher, share your
+        expertise and learn from others.
+      </p>
+    </section>
+
+    <!-- Get Started Section -->
+    <section id="get-started" class="get-started">
+      <h2>Ready to Start?</h2>
+      <a href="login.html" class="btn">Join Now</a>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+      <p>Need help? <a href="contact.html">Contact us</a></p>
+      <p>&copy; 2025 Skill Swap. All Rights Reserved.</p>
+    </footer>
+  </body>
+</html>
