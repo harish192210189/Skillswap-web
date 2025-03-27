@@ -6,6 +6,23 @@ if ($connection->connect_error) {
     die("Connection failed: " . $connection->connect_error);
 }
 
+// Check for guest login
+$json = file_get_contents('php://input');
+$data = json_decode($json, true);
+
+if (isset($data['guest']) && $data['guest'] === true) {
+    $_SESSION['user_id'] = 'guest';
+    $_SESSION['username'] = 'Guest User';
+    $_SESSION['email'] = 'guest@example.com';
+    $_SESSION['dob'] = '';
+    $_SESSION['mobile'] = '';
+    $_SESSION['experience'] = '';
+    $_SESSION['skills'] = '';
+    $_SESSION['is_guest'] = true;
+    echo json_encode(["success" => true, "message" => "Guest login successful", "redirect" => "home.php"]);
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
@@ -19,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $result->fetch_assoc();
         $stored_hash = $user['password'];
 
-        // ✅ Password verification now works correctly
+        // Password verification now works correctly
         if (password_verify($password, $stored_hash)) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['Fullname'];
